@@ -1,0 +1,21 @@
+{
+  "include": [
+   "*.py",
+   "models/*.py"
+  ],
+
+  "exclude": [
+    "data",
+    "test",
+    ".git",
+  ],
+
+  "typeCheckingMode": "basic",
+
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+
+  "pythonVersion": "3.9",
+  "pythonPlatform": "All",
+}
+

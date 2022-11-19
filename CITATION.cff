@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Lawson"
+  given-names: "Dieterich"
+- family-names: "Raventós"
+  given-names: "Allan"
+- family-names: "Warrington"
+  given-names: "Andrew"
+- family-names: "Linderman"
+  given-names: "Scott"
+title: "SIXO: Smoothing Inference with Twisted Objectives"
+version: 1.0.0
+date-released: 2022-11-18
+url: http://sixo.ai

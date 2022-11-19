@@ -1,0 +1,71 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Lint, Test, and Typecheck
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install pytest pytest-testmon flake8 pyright
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings.
+        flake8 . --count --exit-zero --statistics --config=.flake8.ini
+
+    - name: Typecheck with pyright
+      run: |
+        # Print the errors but don't fail the build.
+        pyright || true
+
+    - name: Cache .testmondata
+      # Persist .testmondata between builds to enable shorter test runs runs.
+      # We use this action instead of the default cache so that we update the cache 
+      # even when the tests fail.
+      uses: pat-s/always-upload-cache@v2.1.5
+      with:
+        path: .testmondata
+        # We set a unique key that will never be found using the current commit sha.
+        # We also set a restore-key that is a prefix of key. If the original key is not found,
+        # the cache is searched for keys that equal restore-key and then keys that have
+        # restore-key as a prefix, returning the most recently stored match. So, this setup
+        # will cause a cache miss initially, followed by a retrieval of the most recent cached
+        # data. The cache miss will cause the new data to be written to the cache at key after
+        # the build. If there was no cache miss, the cache would not be updated.
+        key: testmon=1-${{ matrix.python-version }}-${{ github.ref_name }}-${{ github.sha }}
+        restore-keys: testmon=1-${{ matrix.python-version }}-main
+
+    - name: Test with pytest
+      run: |
+        pytest --testmon
